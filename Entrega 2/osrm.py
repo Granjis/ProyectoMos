@@ -74,27 +74,36 @@ def cargar_distancias_y_tiempos(num_clientes, num_depositos, depots, clientes):
     print("Datos guardados en 'distancias_y_tiempos.csv'.")
     return distancias, tiempos
 
-def csv_distancia_tiempo(num_depositos):
-    # Lista para almacenar los datos leídos del CSV
+def csv_distancia_tiempo(num_depositos, num_clientes):
+    # Listas para almacenar los datos
     distancias_leidas = []
     tiempos_leidos = []
 
-    # Leer el archivo CSV y almacenar los datos en las listas
+    # Leer el archivo CSV y manejar la codificación
     with open('distancias_y_tiempos.csv', mode='r') as file:
         reader = csv.reader(file)
-        headers = next(reader)  # Leemos la primera fila (encabezados)
-
-        # Las distancias y tiempos están en las filas 2 y 3 (después de los encabezados)
-        for row in reader:
-            # La primera columna es 'Cliente/Depósito', luego las distancias y tiempos
-            cliente = row[0]
-            distancias = list(map(float, row[1:num_depositos + 1]))  # Convertimos las distancias a enteros
-            tiempos = list(map(float, row[num_depositos + 1:]))  # Convertimos los tiempos a enteros
-            
-            # Guardamos en las listas correspondientes
+        
+        # Saltar las cabeceras hasta encontrar los datos de distancias
+        next(reader)  # Saltar primera fila (Cliente/Depósito, Depósito 1, ...)
+        distancias_row = next(reader)  # Leer la fila con "Distancia (m)"
+        
+        # Procesar las filas con distancias
+        for i in range(num_clientes):
+            row = next(reader)
+            distancias = list(map(float, row[1:num_depositos + 1]))  # Filtrar columnas de depósitos
             distancias_leidas.append(distancias)
+
+        # Saltar hasta la fila con "Tiempo (s)"
+        tiempos_row = next(reader)  # Leer la fila con "Tiempo (s)"
+        
+        # Procesar las filas con tiempos
+        for i in range(num_clientes):
+            row = next(reader)
+            tiempos = list(map(float, row[1:num_depositos + 1]))  # Filtrar columnas de depósitos
             tiempos_leidos.append(tiempos)
+
     return distancias_leidas, tiempos_leidos
+
 
 def haversine_distance(num_clientes, num_depositos, depots, clientes):
     
@@ -129,6 +138,9 @@ def haversine_distance(num_clientes, num_depositos, depots, clientes):
             time = (distance/40)*60
 
             fila_distancias.append(distance)
+            fila_tiempos.append(time)
+        distancias.append(fila_distancias)
+        tiempos.append(fila_tiempos)
     return distancias, tiempos
 
 
